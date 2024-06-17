@@ -1,0 +1,43 @@
+- name: Add Jenkins repository
+  ansible.builtin.yum_repository:
+    name: jenkins
+    description: Jenkins repo
+    baseurl: http://pkg.jenkins.io/redhat-stable
+
+- name: Import Jenkins Key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+- name: Install Jenkin and Java
+  ansible.builtin.package:
+    name:
+      - java-17-amazon-corretto-devel
+      - jenkins
+
+- name: Just force systemd to reread configs
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Set defaults for Jenkins
+  ansible.builtin.template:
+    src: files/jenkins_default
+    dest: /var/lib/jenkins/jenkins.install.UpgradeWizard.state
+
+- name: Create init folder
+  ansible.builtin.file:
+    path: /var/lib/jenkins/init.groovy.d/
+    state: directory
+
+- name: Set username and password
+  ansible.builtin.template:
+    src: files/security.groovy
+    dest: /var/lib/jenkins/init.groovy.d/basic-security.groovy
+
+- name: Start and enable service Jenkins
+  ansible.builtin.service:
+    name: jenkins
+    state: restarted
+    enabled: yes
+
+    

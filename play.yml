@@ -1,0 +1,7 @@
+---
+  - name: Jenkins Build
+    hosts: jenkins
+    vars_files:
+      - secret.yml
+    roles:
+      - jenkins_build
